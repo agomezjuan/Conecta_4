@@ -3,18 +3,19 @@ package Modelo_Conecta_4;
 import java.util.Scanner;
 
 public class Modelo_Conecta4_C {
-	private int[][] tablero;
-	private int columnas;
-	private int turno;
-	private boolean juegoActivo;
-	private Scanner sc;
+	private int[][] tablero; // Matriz que representa el tablero del juego
+	private int columnas; // Número de columnas del tablero
+	private int turno; // Número del jugador que tiene el turno actualmente
+	private boolean juegoActivo; // Bandera para indicar si el juego está activo o no
+	private static Scanner sc; // Objeto Scanner para leer la entrada del usuario
+	private int jugadorGanador; // Número del jugador que ha ganado el juego
 
 	public Modelo_Conecta4_C(int filas, int columnas) {
 		this.columnas = columnas;
-		tablero = new int[filas][columnas];
-		turno = (int) (Math.random() * 2 + 1);
-		juegoActivo = true;
-		sc = new Scanner(System.in);
+		tablero = new int[filas][columnas]; // Inicialización del tablero con el tamaño especificado
+		turno = (int) (Math.random() * 2 + 1); // Elección aleatoria del jugador que comienza
+		juegoActivo = true; // El juego se inicia como activo
+		sc = new Scanner(System.in); // Inicialización del objeto Scanner para la entrada del usuario
 	}
 
 	public static void main(String[] args) {
@@ -22,26 +23,40 @@ public class Modelo_Conecta4_C {
 		int f = 0, c = 0;
 
 		do {
-			f = pideNumero("Ingrese numero de filas del tablero (entre 3 y 10)", 3, 10);
-			c = pideNumero("Ingrese numero de columnas del tablero (entre 3 y 10)", 3, 10);
+			f = pideNumero("Ingrese numero de filas del tablero (entre 3 y 10):", 3, 10);
+			c = pideNumero("Ingrese numero de columnas del tablero (entre 3 y 10):", 3, 10);
+
+			if (f >= c) {
+				System.out.println("El numero de filas debe ser mayor o igual al numero de columnas.");
+			}
 		} while (f >= c);
 
 		Modelo_Conecta4_C juego = new Modelo_Conecta4_C(f, c);
 		juego.iniciarJuego();
 		System.out.println("Fin");
+
+		sc.close();
 	}
 
 	public void iniciarJuego() {
+
 		do {
 			ImprimirTablero();
 			cambioTurno();
-			int insertFichaColum = pideNumero("Ponga la ficha en una columna: ", 1, columnas) - 1;
+			int insertFichaColum = pideNumero("Turno del Jugador " + turno + ". Ponga la ficha en una columna:", 1,
+					columnas) - 1;
 			int fila = insertarFicha(insertFichaColum, turno);
 			juegoActivo = !turnoGanador(fila, insertFichaColum, turno);
 		} while (juegoActivo);
+
+		ImprimirTablero();
+
+		System.out.println("¡Jugador " + jugadorGanador + " ha ganado!");
+
 	}
 
 	public void ImprimirTablero() {
+		System.out.println();
 		System.out.print("\t");
 		for (int i = 1; i <= columnas; i++) {
 			System.out.print(i + " ");
@@ -51,19 +66,20 @@ public class Modelo_Conecta4_C {
 			System.out.print((i + 1) + "\t");
 			for (int j = 0; j < tablero[i].length; j++) {
 				if (tablero[i][j] == 0) {
-					System.out.print("_ ");
+					System.out.print("_ "); // Imprime '_' para casillas vacías
 				} else if (tablero[i][j] == 1) {
-					System.out.print("X ");
+					System.out.print("X "); // Imprime 'X' para fichas del jugador 1
 				} else {
-					System.out.print("O ");
+					System.out.print("O "); // Imprime 'O' para fichas del jugador 2
 				}
 			}
 			System.out.println();
 		}
+		System.out.println();
 	}
 
 	public void cambioTurno() {
-		turno = turno == 1 ? 2 : 1;
+		turno = turno == 1 ? 2 : 1; // Cambia el turno del jugador
 	}
 
 	public int insertarFicha(int columna, int turno) {
@@ -72,17 +88,19 @@ public class Modelo_Conecta4_C {
 		if (columna >= 0 && columna < tablero[0].length) {
 			for (int i = tablero.length - 1; i >= 0; i--) {
 				if (tablero[i][columna] == 0) {
-					tablero[i][columna] = turno;
+					tablero[i][columna] = turno; // Inserta la ficha en la columna seleccionada
 					fila = i;
 					break;
 				}
 			}
 		}
 
-		return fila;
+		return fila; // Retorna la fila en la que se insertó la ficha
 	}
 
 	public boolean turnoGanador(int fila, int columna, int jugador) {
+		// Comprueba si el jugador actual ha ganado el juego
+
 		// Horizontalmente
 		int contador = 0;
 		for (int c = 0; c < columnas; c++) {
@@ -93,6 +111,7 @@ public class Modelo_Conecta4_C {
 			}
 
 			if (contador >= 4) {
+				jugadorGanador = jugador;
 				return true;
 			}
 		}
@@ -107,6 +126,7 @@ public class Modelo_Conecta4_C {
 			}
 
 			if (contador >= 4) {
+				jugadorGanador = jugador;
 				return true;
 			}
 		}
@@ -149,7 +169,7 @@ public class Modelo_Conecta4_C {
 			c++;
 		}
 
-		return false;
+		return false; // Si no hay ganador, retorna false
 	}
 
 	public static int pideNumero(String pregunta, int min, int max) {
@@ -158,9 +178,9 @@ public class Modelo_Conecta4_C {
 		boolean correcto = false;
 
 		do {
-			System.out.println(pregunta);
+			System.out.print(pregunta + " ");
 			try {
-				valor = Integer.parseInt(sc.nextLine());
+				valor = Integer.parseInt(sc.nextLine()); // Lee un número entero de la entrada del usuario
 				if (valor >= min && valor <= max) {
 					correcto = true;
 				} else {
@@ -171,6 +191,7 @@ public class Modelo_Conecta4_C {
 			}
 		} while (!correcto);
 
-		return valor;
+		sc.close();
+		return valor; // Retorna el valor válido ingresado por el usuario
 	}
 }
