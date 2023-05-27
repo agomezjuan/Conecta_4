@@ -36,8 +36,8 @@ public class Modelo_Conecta4_C {
 			ImprimirTablero();
 			cambioTurno();
 			int insertFichaColum = pideNumero("Ponga la ficha en una columna: ", 1, columnas) - 1;
-			insertarFicha(insertFichaColum, turno);
-			juegoActivo = turnoGanador(insertFichaColum, turno);
+			int fila = insertarFicha(insertFichaColum, turno);
+			juegoActivo = !turnoGanador(fila, insertFichaColum, turno);
 		} while (juegoActivo);
 	}
 
@@ -70,13 +70,11 @@ public class Modelo_Conecta4_C {
 		int fila = -1;
 
 		if (columna >= 0 && columna < tablero[0].length) {
-			if (tablero[0][columna] == 0) {
-				for (int i = tablero.length - 1; i >= 0; i--) {
-					if (tablero[i][columna] == 0) {
-						tablero[i][columna] = turno;
-						fila = i;
-						break;
-					}
+			for (int i = tablero.length - 1; i >= 0; i--) {
+				if (tablero[i][columna] == 0) {
+					tablero[i][columna] = turno;
+					fila = i;
+					break;
 				}
 			}
 		}
@@ -84,14 +82,11 @@ public class Modelo_Conecta4_C {
 		return fila;
 	}
 
-	public boolean turnoGanador(int ff, int jugador) {
-		int f = ff;
-		int c = 0;
-		int contador = 0;
-
+	public boolean turnoGanador(int fila, int columna, int jugador) {
 		// Horizontalmente
-		for (c = 0; c < columnas; c++) {
-			if (tablero[f][c] == jugador) {
+		int contador = 0;
+		for (int c = 0; c < columnas; c++) {
+			if (tablero[fila][c] == jugador) {
 				contador++;
 			} else {
 				contador = 0;
@@ -104,8 +99,8 @@ public class Modelo_Conecta4_C {
 
 		// Verticalmente
 		contador = 0;
-		for (c = 0; c < columnas; c++) {
-			if (tablero[c][f] == jugador) {
+		for (int f = 0; f < tablero.length; f++) {
+			if (tablero[f][columna] == jugador) {
 				contador++;
 			} else {
 				contador = 0;
@@ -118,8 +113,10 @@ public class Modelo_Conecta4_C {
 
 		// Diagonal hacia abajo a la derecha
 		contador = 0;
-		for (c = 0; c < columnas; c++) {
-			if (f + c < tablero.length && tablero[f + c][c] == jugador) {
+		int c = columna - Math.min(fila, columna);
+		int f = fila - Math.min(fila, columna);
+		while (f < tablero.length && c < columnas) {
+			if (tablero[f][c] == jugador) {
 				contador++;
 			} else {
 				contador = 0;
@@ -128,12 +125,17 @@ public class Modelo_Conecta4_C {
 			if (contador >= 4) {
 				return true;
 			}
+
+			f++;
+			c++;
 		}
 
 		// Diagonal hacia arriba a la derecha
 		contador = 0;
-		for (c = 0; c < columnas; c++) {
-			if (f - c >= 0 && tablero[f - c][c] == jugador) {
+		c = columna - Math.min(tablero.length - 1 - fila, columna);
+		f = fila + Math.min(tablero.length - 1 - fila, columna);
+		while (f >= 0 && c < columnas) {
+			if (tablero[f][c] == jugador) {
 				contador++;
 			} else {
 				contador = 0;
@@ -142,6 +144,9 @@ public class Modelo_Conecta4_C {
 			if (contador >= 4) {
 				return true;
 			}
+
+			f--;
+			c++;
 		}
 
 		return false;
