@@ -3,19 +3,18 @@ package Modelo_Conecta_4;
 import java.util.Scanner;
 
 public class Modelo_Conecta4_C {
-	Scanner sc = new Scanner(System.in);
-
 	private int[][] tablero;
 	private int columnas;
 	private int turno;
 	private boolean juegoActivo;
+	private Scanner sc;
 
 	public Modelo_Conecta4_C(int filas, int columnas) {
 		this.columnas = columnas;
 		tablero = new int[filas][columnas];
-		turno = (int) (Math.random() * (2 - 1 + 1) + 1);
+		turno = (int) (Math.random() * 2 + 1);
 		juegoActivo = true;
-
+		sc = new Scanner(System.in);
 	}
 
 	public static void main(String[] args) {
@@ -25,7 +24,6 @@ public class Modelo_Conecta4_C {
 		do {
 			f = pideNumero("Ingrese numero de filas del tablero (entre 3 y 10)", 3, 10);
 			c = pideNumero("Ingrese numero de columnas del tablero (entre 3 y 10)", 3, 10);
-
 		} while (f >= c);
 
 		Modelo_Conecta4_C juego = new Modelo_Conecta4_C(f, c);
@@ -34,20 +32,18 @@ public class Modelo_Conecta4_C {
 	}
 
 	public void iniciarJuego() {
-
 		do {
 			ImprimirTablero();
 			cambioTurno();
-			int insertFichaColum = pideNumero("Ponga la ficha en una columna: ", 1, columnas);
-
+			int insertFichaColum = pideNumero("Ponga la ficha en una columna: ", 1, columnas) - 1;
 			insertarFicha(insertFichaColum, turno);
-			juegoActivo = turnoGanador(tablero, insertFichaColum, insertFichaColum, turno);
+			juegoActivo = turnoGanador(insertFichaColum, turno);
 		} while (juegoActivo);
 	}
 
 	public void ImprimirTablero() {
 		System.out.print("\t");
-		for (int i = 1; i <= tablero.length; i++) {
+		for (int i = 1; i <= columnas; i++) {
 			System.out.print(i + " ");
 		}
 		System.out.print("\n");
@@ -67,137 +63,109 @@ public class Modelo_Conecta4_C {
 	}
 
 	public void cambioTurno() {
-		turno = turno == 1 ? 1 : 2;
+		turno = turno == 1 ? 2 : 1;
 	}
 
-	public int insertarFicha(int columnas, int turno) {
-
+	public int insertarFicha(int columna, int turno) {
 		int fila = -1;
 
-		if (columnas > 0 && columnas < tablero[0].length)
-			if (tablero[0][columnas] == 0) {
-
+		if (columna >= 0 && columna < tablero[0].length) {
+			if (tablero[0][columna] == 0) {
 				for (int i = tablero.length - 1; i >= 0; i--) {
-					if (tablero[i][columnas] == 0) {
-						tablero[i][columnas] = turno;
+					if (tablero[i][columna] == 0) {
+						tablero[i][columna] = turno;
 						fila = i;
+						break;
 					}
 				}
 			}
+		}
+
 		return fila;
 	}
 
-	public static boolean turnoGanador(int[][] matriz, int ff, int fc, int jugador) {
-		// horizontalmente
+	public boolean turnoGanador(int ff, int jugador) {
 		int f = ff;
-		int c = fc;
-		int contador = 1;
+		int c = 0;
+		int contador = 0;
 
-		/*--------------
-		for (int c = fc + 1; c < matriz[0].length && matriz[f][c] == jugador; c++) {
-			contador++;
-		}
-		for (int c = fc - 1; c >= 0 && matriz[f][c] == jugador; c-- ) {
-			contador++;
-		}
-		--------------*/
-		// a la derecha
-		while (c < matriz[0].length - 1 && matriz[f][c + 1] == jugador) {
-			c++;
-			contador++;
-		}
-		c = fc;
-		// a la izquierda
-		while (c > 0 && matriz[f][c - 1] == jugador) {
-			c--;
-			contador++;
-		}
-		if (contador >= 4) {
-			return true;
+		// Horizontalmente
+		for (c = 0; c < columnas; c++) {
+			if (tablero[f][c] == jugador) {
+				contador++;
+			} else {
+				contador = 0;
+			}
+
+			if (contador >= 4) {
+				return true;
+			}
 		}
 
-		// verticalmente hacia abajo
-		contador = 1;
-		c = fc;
+		// Verticalmente
+		contador = 0;
+		for (c = 0; c < columnas; c++) {
+			if (tablero[c][f] == jugador) {
+				contador++;
+			} else {
+				contador = 0;
+			}
 
-		while (f < matriz.length - 1 && matriz[f + 1][c] == jugador) {
-			contador++;
-			f++;
-		}
-		if (contador >= 4) {
-			return true;
-		}
-
-		// COMPROBACIÓN DE LA PRIMERA DIAGONAL
-		contador = 1;
-		f = ff;
-		c = fc;
-
-		// hacia arriba a la izquierda
-		while (f > 0 && c > 0 && matriz[f - 1][c - 1] == jugador) {
-			contador++;
-			f--;
-			c--;
-		}
-		// hacia abajo a la derecha
-		f = ff;
-		c = fc;
-		while (f < matriz.length - 1 && c < matriz[0].length && matriz[f + 1][c + 1] == jugador) {
-			contador++;
-			f++;
-			c++;
-		}
-		if (contador >= 4) {
-			return true;
+			if (contador >= 4) {
+				return true;
+			}
 		}
 
-		// COMPROBACIÓN DE LA SEGUNDA DIAGONAL
-		contador = 1;
-		f = ff;
-		c = fc;
-		// hacia arriba a la derecha
-		while (f > 0 && c < matriz[0].length && matriz[f - 1][c + 1] == jugador) {
-			contador++;
-			f--;
-			c++;
+		// Diagonal hacia abajo a la derecha
+		contador = 0;
+		for (c = 0; c < columnas; c++) {
+			if (f + c < tablero.length && tablero[f + c][c] == jugador) {
+				contador++;
+			} else {
+				contador = 0;
+			}
+
+			if (contador >= 4) {
+				return true;
+			}
 		}
-		// hacia abajo a la izquierda
-		f = ff;
-		c = fc;
-		while (f < matriz.length - 1 && c > 0 && matriz[f + 1][c - 1] == jugador) {
-			contador++;
-			f++;
-			c--;
-		}
-		if (contador >= 4) {
-			return true;
+
+		// Diagonal hacia arriba a la derecha
+		contador = 0;
+		for (c = 0; c < columnas; c++) {
+			if (f - c >= 0 && tablero[f - c][c] == jugador) {
+				contador++;
+			} else {
+				contador = 0;
+			}
+
+			if (contador >= 4) {
+				return true;
+			}
 		}
 
 		return false;
-
 	}
 
 	public static int pideNumero(String pregunta, int min, int max) {
 		Scanner sc = new Scanner(System.in);
-		System.out.println(pregunta);
 		int valor = 0;
 		boolean correcto = false;
 
 		do {
+			System.out.println(pregunta);
 			try {
 				valor = Integer.parseInt(sc.nextLine());
 				if (valor >= min && valor <= max) {
 					correcto = true;
 				} else {
-					System.err.println("debe estar entre los valores descritos");
+					System.err.println("Debe estar entre los valores descritos.");
 				}
 			} catch (Exception e) {
-				System.err.println("Error, vuelva a intentarlo." + e.getMessage());
+				System.err.println("Error, vuelva a intentarlo.");
 			}
+		} while (!correcto);
 
-		} while (correcto == false);
-		sc.close();
 		return valor;
 	}
-
 }
