@@ -27,7 +27,7 @@ public class Modelo_Conecta4_C {
 			c = pideNumero("Ingrese numero de columnas del tablero (entre 3 y 10):", 3, 10);
 
 			if (f >= c) {
-				System.out.println("El numero de filas debe ser mayor o igual al numero de columnas.");
+				System.out.println("El numero de filas debe ser mayor que el numero de columnas.");
 			}
 		} while (f >= c);
 
